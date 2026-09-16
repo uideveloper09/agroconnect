@@ -1,0 +1,233 @@
+@import "tailwindcss";
+
+:root {
+  --forest: #0f3d2e;
+  --canopy: #1b5e3f;
+  --leaf: #3d9b5c;
+  --fresh: #4caf6d;
+  --gold: #c9a227;
+  --gold-soft: #e8c96a;
+  --cream: #f6f1e6;
+  --paper: #fffcf7;
+  --mist: #f2faf5;
+  --ink: #14201a;
+  --sage: #5b7264;
+  --line: #d7eadc;
+  --journal: #f4ead8;
+  --journal-deep: #efe6d2;
+  --journal-ink: #1a1812;
+  --danger: #c24b3f;
+  --danger-bg: #fbeae7;
+  --shadow: 0 18px 50px -22px rgba(15, 61, 46, 0.35);
+  --shadow-sm: 0 8px 24px -12px rgba(15, 61, 46, 0.18);
+}
+
+@theme inline {
+  --color-forest: var(--forest);
+  --color-canopy: var(--canopy);
+  --color-leaf: var(--leaf);
+  --color-fresh: var(--fresh);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+  --color-mist: var(--mist);
+  --color-ink: var(--ink);
+  --color-sage: var(--sage);
+  --color-line: var(--line);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-journal: var(--journal);
+  --color-journal-deep: var(--journal-deep);
+  --color-journal-ink: var(--journal-ink);
+  --font-sans: var(--font-jakarta);
+  --font-display: var(--font-sora);
+  --font-serif: var(--font-fraunces);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: var(--font-sora), var(--font-jakarta), sans-serif;
+}
+
+html.lang-hn body {
+  font-family: var(--font-hindi), var(--font-jakarta), sans-serif;
+}
+
+html.lang-hn h1,
+html.lang-hn h2,
+html.lang-hn h3,
+html.lang-hn h4,
+html.lang-hn .font-display,
+html.lang-hn .font-serif {
+  font-family: var(--font-hindi), var(--font-sora), sans-serif;
+}
+
+::selection {
+  background: rgba(61, 155, 92, 0.22);
+  color: var(--forest);
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-photo {
+  animation: kenburns 22s ease-out forwards;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 32s linear infinite;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.55s ease both;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-left {
+  transform: translateX(-32px);
+}
+
+.reveal-right {
+  transform: translateX(32px);
+}
+
+.reveal-down {
+  transform: translateY(-18px);
+}
+
+.reveal-scale {
+  transform: scale(0.96);
+}
+
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.anim-lift {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.anim-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px -20px rgba(15, 61, 46, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-down,
+  .reveal-scale,
+  .reveal.is-in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .anim-lift:hover {
+    transform: none;
+  }
+
+  .animate-kenburns,
+  .hero-photo {
+    animation: none;
+  }
+}
+
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+}
+
+.small-caps {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.hairline {
+  height: 1px;
+  background: var(--line);
+}
+
+.drop-cap::first-letter {
+  float: left;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 4.4rem;
+  line-height: 0.8;
+  padding: 10px 12px 0 0;
+  color: var(--forest);
+  font-weight: 600;
+}
+
+.vertical-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+}

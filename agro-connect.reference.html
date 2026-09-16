@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agro Connect — Kisan se Bazaar tak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --deep: #1B5E3F;
+  --deep-dark: #14432E;
+  --fresh: #4CAF6D;
+  --fresh-light: #7FD19B;
+  --gold: #D9A441;
+  --bg: #FFFFFF;
+  --bg-mist: #F2FAF5;
+  --bg-mist-2: #E8F6ED;
+  --line: #DCEEE1;
+  --text: #1E2B23;
+  --text-soft: #52685B;
+  --danger: #C24B3F;
+  --danger-bg: #FBEAE7;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 10px 30px -12px rgba(20,67,46,0.18);
+  --shadow-sm: 0 4px 14px -6px rgba(20,67,46,0.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',sans-serif;
+  color:var(--text);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+h1,h2,h3,h4,.brand{font-family:'Sora',sans-serif}
+img{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select{font-family:inherit}
+a{color:inherit;text-decoration:none}
+.screen{display:none;min-height:100vh;animation:fadeIn .35s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== shared bits ===== */
+.container{max-width:1200px;margin:0 auto;padding:0 32px}
+.leaf-badge{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:linear-gradient(155deg,var(--fresh),var(--deep));color:#fff;font-size:22px;flex-shrink:0}
+.brand-lockup{display:flex;align-items:center;gap:12px}
+.brand-name{font-size:22px;font-weight:800;color:var(--deep-dark);line-height:1.1}
+.brand-tag{font-size:12px;color:var(--text-soft);font-weight:500}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 24px;border-radius:12px;font-weight:700;font-size:15px;transition:transform .15s ease, box-shadow .15s ease, background .15s ease}
+.btn-primary{background:var(--deep);color:#fff;box-shadow:var(--shadow-sm)}
+.btn-primary:hover{background:var(--deep-dark);transform:translateY(-1px)}
+.btn-primary:disabled{background:#A9BDB0;box-shadow:none;cursor:not-allowed;transform:none}
+.btn-outline{background:#fff;color:var(--deep);border:1.5px solid var(--line)}
+.btn-outline:hover{border-color:var(--fresh)}
+.btn-block{width:100%}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:13.5px;font-weight:600;color:var(--text-soft);margin-bottom:7px}
+.input-wrap{position:relative}
+.input-wrap input, .input-wrap select{
+  width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid var(--line);
+  font-size:15px;color:var(--text);background:#fff;transition:border-color .15s ease;
+}
+.input-wrap input:focus, .input-wrap select:focus{outline:none;border-color:var(--fresh)}
+.input-prefix{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-soft);font-weight:600;font-size:15px}
+.input-wrap input.has-prefix{padding-left:52px}
+.input-wrap .toggle-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text-soft);font-size:13px;font-weight:600;background:var(--bg-mist);padding:6px 10px;border-radius:8px}
+.err-text{color:var(--danger);font-size:12.5px;margin-top:6px;font-weight:500;display:none}
+.field.error input{border-color:var(--danger);background:var(--danger-bg)}
+.field.error .err-text{display:block}
+.banner{display:none;align-items:flex-start;gap:10px;background:var(--danger-bg);border:1px solid #F0C7C0;color:var(--danger);padding:12px 14px;border-radius:12px;font-size:13.5px;font-weight:500;margin-bottom:16px}
+.banner.show{display:flex}
+.success-banner{display:none;align-items:center;gap:10px;background:var(--bg-mist-2);border:1px solid var(--line);color:var(--deep-dark);padding:12px 14px;border-radius:12px;font-size:13.5px;font-weight:600;margin-bottom:16px}
+.success-banner.show{display:flex}
+.spinner{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite;display:none}
+.spinner.show{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== LOGIN ===== */
+#screen-login{background:var(--bg-mist)}
+.login-grid{display:grid;grid-template-columns:1.1fr 1fr;min-height:100vh}
+.login-visual{
+  position:relative;background:linear-gradient(160deg,#1B5E3F 0%, #2E7D52 45%, #4CAF6D 100%);
+  padding:56px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;
+}
+.login-visual::before{
+  content:"";position:absolute;left:-10%;right:-10%;bottom:-6%;height:46%;
+  background:repeating-linear-gradient(100deg, rgba(255,255,255,0.07) 0 3px, transparent 3px 22px);
+  transform:skewY(-3deg);
+}
+.field-rows{position:absolute;bottom:0;left:0;right:0;height:38%;
+  background:linear-gradient(180deg, transparent, rgba(20,67,46,0.55));
+}
+.field-rows::after{
+  content:"";position:absolute;inset:0;
+  background-image:repeating-linear-gradient(90deg, rgba(255,255,255,0.10) 0 10px, transparent 10px 34px);
+}
+.sun{position:absolute;top:48px;right:64px;width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #FFE9A8, var(--gold));box-shadow:0 0 60px 12px rgba(217,164,65,0.45)}
+.visual-top{position:relative;z-index:2}
+.visual-top .brand-name, .visual-top .brand-tag{color:#fff}
+.visual-mid{position:relative;z-index:2;margin-top:40px}
+.visual-mid h1{font-size:42px;line-height:1.15;font-weight:800;max-width:9.5em}
+.visual-mid p{margin-top:14px;font-size:16px;color:rgba(255,255,255,0.88);max-width:34ch;font-style:italic}
+.visual-bottom{position:relative;z-index:2;display:flex;gap:26px;flex-wrap:wrap}
+.visual-stat{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);backdrop-filter:blur(3px);
+  padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600}
+.wheat-icon{position:absolute;z-index:2;font-size:120px;opacity:0.16;right:-10px;bottom:60px;transform:rotate(8deg)}
+
+.login-form-side{display:flex;align-items:center;justify-content:center;padding:40px}
+.login-card{width:100%;max-width:420px;background:#fff;border-radius:20px;box-shadow:var(--shadow);
+  padding:40px 36px;border:1px solid var(--line)}
+.login-card h2{font-size:24px;font-weight:800;color:var(--deep-dark)}
+.login-card .sub{color:var(--text-soft);font-size:14px;margin-top:6px;margin-bottom:26px}
+.row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;font-size:13.5px}
+.remember{display:flex;align-items:center;gap:8px;color:var(--text-soft);font-weight:500}
+.remember input{width:16px;height:16px;accent-color:var(--deep)}
+.forgot{color:var(--deep);font-weight:700}
+.login-btn-text{display:inline-flex;align-items:center;gap:8px}
+.divider-line{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--text-soft);font-size:12.5px;font-weight:600}
+.divider-line::before, .divider-line::after{content:"";flex:1;height:1px;background:var(--line)}
+.otp-toggle{width:100%;padding:13px 20px;border-radius:12px;border:1.5px solid var(--line);color:var(--deep);font-weight:700;font-size:14.5px;background:var(--bg-mist)}
+.otp-toggle:hover{border-color:var(--fresh)}
+.register-line{text-align:center;margin-top:22px;font-size:13.5px;color:var(--text-soft)}
+.register-line b{color:var(--deep);cursor:pointer}
+.success-screen{display:none;text-align:center;padding:20px 0}
+.success-screen.show{display:block}
+.login-form-body.hide{display:none}
+.big-check{width:64px;height:64px;border-radius:50%;background:var(--bg-mist-2);color:var(--deep);
+  display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;border:2px solid var(--fresh)}
+.demo-hint{margin-top:18px;font-size:11.5px;color:var(--text-soft);background:var(--bg-mist);border:1px dashed var(--line);padding:10px 12px;border-radius:10px}
+
+@media (max-width:900px){
+  .login-grid{grid-template-columns:1fr}
+  .login-visual{padding:36px 28px;min-height:280px}
+  .visual-mid h1{font-size:30px}
+  .login-form-side{padding:24px}
+  .login-card{padding:30px 22px;box-shadow:none;border:none}
+}
+
+/* ===== APP SHELL (post-login) ===== */
+.app-header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line)}
+.app-header-inner{display:flex;align-items:center;justify-content:space-between;padding:16px 32px}
+.app-nav{display:flex;gap:6px}
+.app-nav a{padding:10px 16px;border-radius:10px;font-weight:600;font-size:14.5px;color:var(--text-soft)}
+.app-nav a.active{color:var(--deep);background:var(--bg-mist)}
+.app-nav a:hover{color:var(--deep)}
+.header-right{display:flex;align-items:center;gap:18px}
+.bell-btn{position:relative;width:40px;height:40px;border-radius:10px;background:var(--bg-mist);display:flex;align-items:center;justify-content:center;font-size:17px}
+.bell-dot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--danger)}
+.profile-btn{display:flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;border-radius:12px}
+.profile-btn:hover{background:var(--bg-mist)}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(155deg,var(--fresh),var(--deep));
+  color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.profile-name{font-size:13.5px;font-weight:700;line-height:1.2}
+.profile-name span{display:block;font-weight:500;color:var(--text-soft);font-size:11.5px}
+.profile-menu{position:absolute;right:32px;top:64px;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:var(--shadow);width:220px;padding:8px;display:none;z-index:60}
+.profile-menu.show{display:block}
+.profile-menu a, .profile-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--text)}
+.profile-menu a:hover, .profile-menu button:hover{background:var(--bg-mist)}
+.profile-menu .logout-item{color:var(--danger)}
+.hamburger{display:none;font-size:22px;color:var(--deep)}
+
+@media (max-width:900px){
+  .app-nav{display:none}
+  .hamburger{display:block}
+  .app-header-inner{padding:14px 20px}
+}
+
+.app-body{background:var(--bg-mist);min-height:calc(100vh - 73px);padding:36px 0 60px}
+
+/* dashboard hero */
+.dash-hero{background:linear-gradient(150deg,#1B5E3F,#3D8F5F);border-radius:22px;padding:38px 42px;color:#fff;
+  display:flex;align-items:center;justify-content:space-between;gap:30px;flex-wrap:wrap;margin-bottom:36px}
+.dash-hero h1{font-size:28px;font-weight:800}
+.dash-hero p{margin-top:8px;color:rgba(255,255,255,0.85);font-size:14.5px;max-width:44ch}
+.dash-hero .btn-primary{background:#fff;color:var(--deep-dark)}
+.dash-hero .btn-primary:hover{background:#EFEFEF}
+.section-title{font-size:20px;font-weight:800;color:var(--deep-dark);margin-bottom:4px}
+.section-sub{color:var(--text-soft);font-size:13.5px;margin-bottom:20px}
+
+/* progress stepper */
+.stepper{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 auto 34px;max-width:760px;flex-wrap:wrap}
+.step-item{display:flex;align-items:center;gap:8px}
+.step-dot{width:30px;height:30px;border-radius:50%;background:#fff;border:2px solid var(--line);color:var(--text-soft);
+  display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800}
+.step-item.done .step-dot{background:var(--deep);border-color:var(--deep);color:#fff}
+.step-item.current .step-dot{background:#fff;border-color:var(--deep);color:var(--deep)}
+.step-label{font-size:12.5px;font-weight:700;color:var(--text-soft)}
+.step-item.done .step-label, .step-item.current .step-label{color:var(--deep-dark)}
+.step-connector{width:34px;height:2px;background:var(--line)}
+.step-item.done ~ .step-connector, .step-connector.done{background:var(--deep)}
+@media (max-width:700px){.step-label{display:none}.step-connector{width:16px}}
+
+.card{background:#fff;border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow-sm)}
+
+/* crop grid */
+.crop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:26px}
+.crop-card{position:relative;padding:18px;border-radius:14px;border:2px solid var(--line);background:#fff;text-align:center;cursor:pointer;transition:all .15s ease}
+.crop-card:hover{border-color:var(--fresh-light)}
+.crop-card.selected{border-color:var(--fresh);box-shadow:0 8px 22px -8px rgba(76,175,109,0.4);transform:translateY(-2px)}
+.crop-emoji{font-size:38px;margin-bottom:10px}
+.crop-name{font-weight:700;font-size:14.5px}
+.crop-check{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--deep);color:#fff;
+  display:none;align-items:center;justify-content:center;font-size:12px}
+.crop-card.selected .crop-check{display:flex}
+@media (max-width:700px){.crop-grid{grid-template-columns:repeat(2,1fr)}}
+.step-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media (max-width:900px){.step-grid-4{grid-template-columns:repeat(2,1fr)}}
+
+.qty-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.qty-row .field{flex:1;min-width:160px;margin-bottom:0}
+
+/* payment */
+.pay-amount{background:var(--bg-mist-2);border-radius:16px;padding:26px;text-align:center;margin-bottom:22px}
+.pay-amount .amt{font-size:38px;font-weight:800;color:var(--deep-dark)}
+.pay-amount p{font-size:13px;color:var(--text-soft);margin-top:6px}
+.pay-method{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:10px;cursor:pointer}
+.pay-method:hover{border-color:var(--fresh-light)}
+.pay-method.selected{border-color:var(--fresh);background:var(--bg-mist)}
+.pay-method input{width:17px;height:17px;accent-color:var(--deep)}
+.secure-note{display:flex;align-items:center;gap:8px;justify-content:center;font-size:12px;color:var(--text-soft);margin-top:14px}
+
+/* slots */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-nav{width:32px;height:32px;border-radius:8px;background:var(--bg-mist);font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:26px}
+.cal-dow{text-align:center;font-size:11.5px;font-weight:700;color:var(--text-soft);padding-bottom:6px}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;border:1.5px solid transparent}
+.cal-day:hover{background:var(--bg-mist)}
+.cal-day.selected{background:var(--deep);color:#fff}
+.cal-day.disabled{color:#C9D6CD;cursor:not-allowed}
+.slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.slot-btn{padding:13px;border-radius:10px;border:1.5px solid var(--line);font-weight:700;font-size:13.5px;background:#fff}
+.slot-btn:hover:not(:disabled){border-color:var(--fresh-light)}
+.slot-btn.selected{background:var(--deep);border-color:var(--deep);color:#fff}
+.slot-btn:disabled{background:var(--bg-mist);color:#B9C7BE;text-decoration:line-through;cursor:not-allowed}
+@media (max-width:700px){.slot-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* confirmation */
+.confirm-icon{width:76px;height:76px;border-radius:50%;background:var(--bg-mist-2);border:2px solid var(--fresh);
+  color:var(--deep);display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 18px}
+.confirm-detail-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.confirm-detail-row:last-child{border-bottom:none}
+.confirm-detail-row span:first-child{color:var(--text-soft);font-weight:500}
+.confirm-detail-row span:last-child{font-weight:700}
+
+/* tracking */
+.timeline{position:relative;padding-left:8px}
+.tl-item{position:relative;padding:0 0 32px 46px}
+.tl-item::before{content:"";position:absolute;left:14px;top:34px;bottom:0;width:2px;background:var(--line)}
+.tl-item:last-child::before{display:none}
+.tl-item.done::before{background:var(--deep)}
+.tl-dot{position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--bg-mist);border:2px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:14px}
+.tl-item.done .tl-dot{background:var(--deep);border-color:var(--deep);color:#fff}
+.tl-item.current .tl-dot{border-color:var(--fresh);background:#fff;color:var(--deep)}
+.tl-title{font-weight:700;font-size:15px}
+.tl-sub{font-size:13px;color:var(--text-soft);margin-top:3px}
+.route-visual{display:flex;align-items:center;justify-content:space-between;margin:22px 0 8px;padding:20px;background:var(--bg-mist);border-radius:14px}
+.route-point{text-align:center;font-size:12.5px;font-weight:700;color:var(--deep-dark)}
+.route-point .ic{font-size:26px;display:block;margin-bottom:6px}
+.route-line{flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--fresh) 0 6px, transparent 6px 12px);margin:0 10px 22px}
+
+.two-col{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
+@media (max-width:900px){.two-col{grid-template-columns:1fr}}
+.pad{padding:28px}
+.max-form{max-width:640px;margin:0 auto}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-soft);font-weight:600;font-size:13.5px;margin-bottom:18px}
+.back-link:hover{color:var(--deep)}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<section class="screen active" id="screen-login">
+  <div class="login-grid">
+    <div class="login-visual">
+      <div class="sun"></div>
+      <div class="wheat-icon">🌾</div>
+      <div class="visual-top">
+        <div class="brand-lockup">
+          <div class="leaf-badge">🌿</div>
+          <div>
+            <div class="brand-name">Agro Connect</div>
+            <div class="brand-tag" style="color:rgba(255,255,255,.8)">Kisan se Bazaar tak</div>
+          </div>
+        </div>
+      </div>
+      <div class="visual-mid">
+        <h1>Aapki fasal, aapka bazaar, aapka behtar daam.</h1>
+        <p>“Har kisan ka apna vishwasniya bazaar — seedha khet se market tak.”</p>
+      </div>
+      <div class="visual-bottom">
+        <div class="visual-stat">🌱 50K+ Happy Farmers</div>
+        <div class="visual-stat">🏪 100+ Market Partners</div>
+        <div class="visual-stat">🔒 Secure & Transparent</div>
+      </div>
+      <div class="field-rows"></div>
+    </div>
+
+    <div class="login-form-side">
+      <div class="login-card">
+
+        <div id="loginFormBody" class="login-form-body">
+          <h2>Welcome to Agro Connect</h2>
+          <p class="sub">Login karke apni fasal ka safar shuru karein.</p>
+
+          <div class="banner" id="loginErrorBanner">
+            <span>⚠️</span><span id="loginErrorText">Mobile number or password is incorrect.</span>
+          </div>
+
+          <!-- password mode -->
+          <div id="passwordMode">
+            <div class="field" id="mobileField">
+              <label>Mobile Number</label>
+              <div class="input-wrap">
+                <span class="input-prefix">+91</span>
+                <input type="tel" maxlength="10" id="mobileInput" class="has-prefix" placeholder="98765 43210">
+              </div>
+              <div class="err-text" id="mobileErr">Please enter your mobile number.</div>
+            </div>
+
+            <div class="field" id="passwordField">
+              <label>Password</label>
+              <div class="input-wrap">
+                <input type="password" id="passwordInput" placeholder="Enter your password">
+                <span class="toggle-eye" onclick="togglePw()" id="pwToggle">Show</span>
+              </div>
+              <div class="err-text" id="passwordErr">Please enter your password.</div>
+            </div>
+
+            <div class="row-between">
+              <label class="remember"><input type="checkbox"> Remember me</label>
+              <a class="forgot" href="#">Forgot Password?</a>
+            </div>
+
+            <button class="btn btn-primary btn-block" id="loginBtn" onclick="attemptLogin()">
+              <span class="spinner" id="loginSpinner"></span>
+              <span class="login-btn-text" id="loginBtnText">Login</span>
+            </button>
+
+            <div class="divider-line">OR</div>
+            <button class="otp-toggle" onclick="showOtpMode()">📱 Login with OTP</button>
+          </div>
+
+          <!-- otp mode -->
+          <div id="otpMode" style="display:none">
+            <div class="field">
+              <label>Mobile Number</label>
+              <div class="input-wrap">
+                <span class="input-prefix">+91</span>
+                <input type="tel" maxlength="10" id="otpMobileInput" class="has-prefix" placeholder="98765 43210">
+              </div>
+            </div>
+            <div class="field">
+              <label>Enter OTP</label>
+              <div class="input-wrap">
+                <input type="text" maxlength="6" id="otpInput" placeholder="6-digit OTP">
+              </div>
+              <div class="err-text" id="otpErr">Please enter a valid 6-digit OTP.</div>
+            </div>
+            <button class="btn btn-primary btn-block" id="otpLoginBtn" onclick="attemptOtpLogin()">
+              <span class="spinner" id="otpSpinner"></span>
+              <span id="otpBtnText">Verify & Login</span>
+            </button>
+            <div class="divider-line">OR</div>
+            <button class="otp-toggle" onclick="showPasswordMode()">🔑 Login with Password</button>
+          </div>
+
+          <div class="register-line">Don't have an account? <b>Register Now</b></div>
+          <div class="demo-hint">Demo: mobile <b>9876543210</b>, password <b>kisan123</b> · OTP <b>123456</b></div>
+        </div>
+
+        <div class="success-screen" id="loginSuccessScreen">
+          <div class="big-check">✓</div>
+          <h2>Login successful. Welcome back!</h2>
+          <p class="sub">Taking you to your dashboard…</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APP SHELL (shared header) rendered per screen ============ -->
+<template id="headerTemplate"></template>
+
+<!-- ============ DASHBOARD ============ -->
+<section class="screen" id="screen-dashboard">
+  <div id="header-dashboard"></div>
+  <div class="app-body">
+    <div class="container">
+      <div class="dash-hero">
+        <div>
+          <h1 id="dashGreeting">Namaste, Ram Kishan 👋</h1>
+          <p>Apni fasal bechna ab aasan hai — select karein, book karein aur seedha bazaar tak pahunchayein.</p>
+        </div>
+        <button class="btn btn-primary" onclick="startSellFlow()">Start Selling →</button>
+      </div>
+
+      <div class="section-title">4 Simple Steps to Sell Your Crop</div>
+      <div class="section-sub">From your field to the market — easily, securely and transparently</div>
+
+      <div class="step-grid-4">
+        <div class="card pad" style="text-align:center">
+          <div class="crop-emoji">🌾</div>
+          <div class="crop-name">1. Select Crop</div>
+          <p class="section-sub" style="margin:6px 0 0">Choose crop & quantity</p>
+        </div>
+        <div class="card pad" style="text-align:center">
+          <div class="crop-emoji">💳</div>
+          <div class="crop-name">2. Token Payment</div>
+          <p class="section-sub" style="margin:6px 0 0">Pay ₹500 to reserve</p>
+        </div>
+        <div class="card pad" style="text-align:center">
+          <div class="crop-emoji">📅</div>
+          <div class="crop-name">3. Book Slot</div>
+          <p class="section-sub" style="margin:6px 0 0">Pick date & time</p>
+        </div>
+        <div class="card pad" style="text-align:center">
+          <div class="crop-emoji">🚚</div>
+          <div class="crop-name">4. Track Crop</div>
+          <p class="section-sub" style="margin:6px 0 0">Farm to market, live</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SELECT CROP ============ -->
+<section class="screen" id="screen-select-crop">
+  <div id="header-select-crop"></div>
+  <div class="app-body">
+    <div class="container">
+      <div id="stepper-1"></div>
+      <div class="max-form">
+        <div class="card pad">
+          <div class="section-title">Select Your Crop</div>
+          <div class="section-sub">Choose the crop you want to sell</div>
+          <div class="crop-grid" id="cropGrid"></div>
+
+          <div class="qty-row">
+            <div class="field">
+              <label>Quantity</label>
+              <div class="input-wrap"><input type="number" id="qtyInput" placeholder="e.g. 50" min="1"></div>
+            </div>
+            <div class="field">
+              <label>Unit</label>
+              <div class="input-wrap">
+                <select id="unitInput">
+                  <option>Kg</option>
+                  <option selected>Quintal</option>
+                  <option>Ton</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="err-text" id="cropErr" style="margin-top:12px">Please select a crop and enter quantity.</div>
+
+          <button class="btn btn-primary btn-block" style="margin-top:22px" onclick="goToPayment()">Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOKEN PAYMENT ============ -->
+<section class="screen" id="screen-payment">
+  <div id="header-payment"></div>
+  <div class="app-body">
+    <div class="container">
+      <div id="stepper-2"></div>
+      <div class="max-form">
+        <a class="back-link" onclick="showScreen('screen-select-crop')">← Back</a>
+        <div class="card pad">
+          <div class="section-title">Token Payment</div>
+          <div class="section-sub">Pay a token amount to reserve your selling time slot.</div>
+
+          <div class="pay-amount">
+            <div class="amt">₹500</div>
+            <p>The token amount confirms your booking. The remaining amount will be settled when your crop is sold.</p>
+          </div>
+
+          <label style="font-size:13.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:10px">Select Payment Method</label>
+          <label class="pay-method selected" onclick="selectPayMethod(this)"><input type="radio" name="pay" checked> 📱 UPI (GPay, PhonePe, Paytm)</label>
+          <label class="pay-method" onclick="selectPayMethod(this)"><input type="radio" name="pay"> 💳 Debit / Credit Card</label>
+          <label class="pay-method" onclick="selectPayMethod(this)"><input type="radio" name="pay"> 🏦 Net Banking</label>
+
+          <button class="btn btn-primary btn-block" style="margin-top:20px" id="payBtn" onclick="processPayment()">
+            <span class="spinner" id="paySpinner"></span>
+            <span id="payBtnText">Pay ₹500</span>
+          </button>
+          <div class="secure-note">🔒 100% secure payment · your information is safe with us</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BOOK SLOT ============ -->
+<section class="screen" id="screen-slot">
+  <div id="header-slot"></div>
+  <div class="app-body">
+    <div class="container">
+      <div id="stepper-3"></div>
+      <div class="max-form">
+        <div class="card pad">
+          <div class="section-title">Book Your Selling Slot</div>
+          <div class="section-sub">Choose an available date and time for your crop sale</div>
+
+          <div class="cal-head">
+            <button class="cal-nav">‹</button>
+            <div style="font-weight:800">November 2026</div>
+            <button class="cal-nav">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+
+          <label style="font-size:13.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:10px">Available Time Slots</label>
+          <div class="slot-grid" id="slotGrid"></div>
+
+          <div class="err-text" id="slotErr" style="margin-top:12px">Please select a date and time slot.</div>
+
+          <button class="btn btn-primary btn-block" style="margin-top:22px" onclick="confirmBooking()">Confirm Booking</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONFIRMATION ============ -->
+<section class="screen" id="screen-confirmation">
+  <div id="header-confirmation"></div>
+  <div class="app-body">
+    <div class="container">
+      <div class="max-form">
+        <div class="card pad" style="text-align:center">
+          <div class="confirm-icon">✓</div>
+          <div class="section-title" style="text-align:center">Booking Confirmed!</div>
+          <p class="section-sub" style="text-align:center">Your selling slot has been reserved successfully</p>
+
+          <div style="text-align:left;margin-top:10px">
+            <div class="confirm-detail-row"><span>Crop</span><span id="confCrop">Wheat</span></div>
+            <div class="confirm-detail-row"><span>Quantity</span><span id="confQty">50 Quintal</span></div>
+            <div class="confirm-detail-row"><span>Date</span><span id="confDate">18 November 2026</span></div>
+            <div class="confirm-detail-row"><span>Time</span><span id="confTime">10:00 AM</span></div>
+            <div class="confirm-detail-row"><span>Token Paid</span><span>₹500</span></div>
+            <div class="confirm-detail-row"><span>Booking ID</span><span id="confId">AC-2026-00125</span></div>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:26px">
+            <button class="btn btn-primary" style="flex:1" onclick="showScreen('screen-tracking')">Track My Crop</button>
+            <button class="btn btn-outline" style="flex:1" onclick="showScreen('screen-dashboard')">View Booking Details</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRACKING ============ -->
+<section class="screen" id="screen-tracking">
+  <div id="header-tracking"></div>
+  <div class="app-body">
+    <div class="container">
+      <div class="section-title">Apni Fasal ka Safar Real-Time Dekhiye</div>
+      <div class="section-sub">Track your crop from farm to market</div>
+
+      <div class="two-col">
+        <div class="card pad">
+          <div class="route-visual">
+            <div class="route-point"><span class="ic">🏡</span>Farmer's Farm</div>
+            <div class="route-line"></div>
+            <div class="route-point"><span class="ic">🚚</span>Transport</div>
+            <div class="route-line"></div>
+            <div class="route-point"><span class="ic">🏪</span>Market</div>
+          </div>
+
+          <div class="timeline" style="margin-top:20px">
+            <div class="tl-item done">
+              <div class="tl-dot">✓</div>
+              <div class="tl-title">Booking Confirmed</div>
+              <div class="tl-sub">Selling slot reserved</div>
+            </div>
+            <div class="tl-item current">
+              <div class="tl-dot">🚚</div>
+              <div class="tl-title">Crop Picked Up</div>
+              <div class="tl-sub">Crop collected from farm, on the way to market</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot">🏪</div>
+              <div class="tl-title">At Market</div>
+              <div class="tl-sub">Quality inspection</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot">₹</div>
+              <div class="tl-title">Sold</div>
+              <div class="tl-sub">Payment completed</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card pad">
+          <div class="section-title" style="font-size:16px">Booking Summary</div>
+          <div class="confirm-detail-row"><span>Booking ID</span><span id="trkId">AC-2026-00125</span></div>
+          <div class="confirm-detail-row"><span>Crop</span><span id="trkCrop">Wheat · 50 Quintal</span></div>
+          <div class="confirm-detail-row"><span>Est. Arrival</span><span>11:30 AM</span></div>
+          <button class="btn btn-outline btn-block" style="margin-top:18px" onclick="showScreen('screen-dashboard')">Back to Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ================= STATE ================= */
+let isLoggedIn = false;
+let farmerName = "Ram Kishan";
+let selectedCrop = null;
+let selectedQty = null;
+let selectedUnit = "Quintal";
+let selectedDate = 18;
+let selectedTime = "10:00 AM";
+
+const PROTECTED = ["screen-dashboard","screen-select-crop","screen-payment","screen-slot","screen-confirmation","screen-tracking"];
+
+/* ================= HEADER ================= */
+function headerHtml(activeLabel){
+  return `
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="brand-lockup" style="cursor:pointer" onclick="isLoggedIn && showScreen('screen-dashboard')">
+        <div class="leaf-badge">🌿</div>
+        <div><div class="brand-name">Agro Connect</div><div class="brand-tag">Kisan se Bazaar tak</div></div>
+      </div>
+      <nav class="app-nav">
+        <a class="${activeLabel==='Home'?'active':''}" onclick="showScreen('screen-dashboard')">Home</a>
+        <a class="${activeLabel==='Sell'?'active':''}" onclick="startSellFlow()">Sell Crops</a>
+        <a class="${activeLabel==='Track'?'active':''}" onclick="showScreen('screen-tracking')">Track Crops</a>
+        <a>Support</a>
+        <a>About Us</a>
+      </nav>
+      <div class="header-right">
+        <div class="bell-btn">🔔<span class="bell-dot"></span></div>
+        <div style="position:relative">
+          <div class="profile-btn" onclick="toggleProfileMenu()">
+            <div class="avatar">RK</div>
+            <div class="profile-name">${farmerName}<span>Farmer</span></div>
+          </div>
+        </div>
+        <div class="hamburger">☰</div>
+      </div>
+    </div>
+  </header>
+  <div class="profile-menu" id="profileMenu">
+    <a onclick="closeProfileMenu()">👤 My Profile</a>
+    <a onclick="closeProfileMenu()">📦 My Bookings</a>
+    <a onclick="showScreen('screen-tracking');closeProfileMenu()">🚚 Track My Crop</a>
+    <a onclick="closeProfileMenu()">❓ Help & Support</a>
+    <button class="logout-item" onclick="logout()">🚪 Logout</button>
+  </div>`;
+}
+function mountHeaders(){
+  document.getElementById('header-dashboard').innerHTML = headerHtml('Home');
+  document.getElementById('header-select-crop').innerHTML = headerHtml('Sell');
+  document.getElementById('header-payment').innerHTML = headerHtml('Sell');
+  document.getElementById('header-slot').innerHTML = headerHtml('Sell');
+  document.getElementById('header-confirmation').innerHTML = headerHtml('Sell');
+  document.getElementById('header-tracking').innerHTML = headerHtml('Track');
+}
+function toggleProfileMenu(){ document.getElementById('profileMenu')?.classList.toggle('show'); }
+function closeProfileMenu(){ document.getElementById('profileMenu')?.classList.remove('show'); }
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.profile-btn') && !e.target.closest('.profile-menu')){ closeProfileMenu(); }
+});
+
+/* ================= ROUTING / AUTH GUARD ================= */
+function showScreen(id){
+  if(PROTECTED.includes(id) && !isLoggedIn){
+    showScreen('screen-login');
+    return;
+  }
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id.startsWith('screen-') && id!=='screen-login') mountHeaders();
+  closeProfileMenu();
+}
+
+function logout(){
+  isLoggedIn = false;
+  selectedCrop=null; selectedQty=null;
+  document.getElementById('loginFormBody').style.display='block';
+  document.getElementById('loginSuccessScreen').classList.remove('show');
+  document.getElementById('mobileInput').value='';
+  document.getElementById('passwordInput').value='';
+  showScreen('screen-login');
+}
+
+/* ================= LOGIN LOGIC ================= */
+function togglePw(){
+  const inp = document.getElementById('passwordInput');
+  const t = document.getElementById('pwToggle');
+  if(inp.type==='password'){ inp.type='text'; t.textContent='Hide'; } else { inp.type='password'; t.textContent='Show'; }
+}
+function showOtpMode(){
+  document.getElementById('passwordMode').style.display='none';
+  document.getElementById('otpMode').style.display='block';
+}
+function showPasswordMode(){
+  document.getElementById('otpMode').style.display='none';
+  document.getElementById('passwordMode').style.display='block';
+}
+function clearLoginErrors(){
+  document.getElementById('mobileField').classList.remove('error');
+  document.getElementById('passwordField').classList.remove('error');
+  document.getElementById('loginErrorBanner').classList.remove('show');
+}
+function attemptLogin(){
+  clearLoginErrors();
+  const mobile = document.getElementById('mobileInput').value.trim();
+  const pw = document.getElementById('passwordInput').value;
+  let hasErr = false;
+  if(!mobile){ document.getElementById('mobileField').classList.add('error');
+    document.getElementById('mobileErr').textContent='Please enter your mobile number.'; hasErr=true; }
+  else if(!/^\d{10}$/.test(mobile)){ document.getElementById('mobileField').classList.add('error');
+    document.getElementById('mobileErr').textContent='Enter a valid 10-digit mobile number.'; hasErr=true; }
+  if(!pw){ document.getElementById('passwordField').classList.add('error'); hasErr=true; }
+  if(hasErr) return;
+
+  const btn = document.getElementById('loginBtn');
+  const spinner = document.getElementById('loginSpinner');
+  const btnText = document.getElementById('loginBtnText');
+  btn.disabled = true; spinner.classList.add('show'); btnText.textContent='Logging in...';
+
+  setTimeout(()=>{
+    if(mobile==='9876543210' && pw==='kisan123'){
+      completeLogin();
+    } else {
+      btn.disabled=false; spinner.classList.remove('show'); btnText.textContent='Login';
+      document.getElementById('loginErrorBanner').classList.add('show');
+      document.getElementById('loginErrorText').textContent='Mobile number or password is incorrect.';
+    }
+  }, 1000);
+}
+function attemptOtpLogin(){
+  const mobile = document.getElementById('otpMobileInput').value.trim();
+  const otp = document.getElementById('otpInput').value.trim();
+  document.getElementById('otpErr').style.display='none';
+  if(!/^\d{10}$/.test(mobile) || !/^\d{6}$/.test(otp)){
+    document.getElementById('otpErr').style.display='block';
+    return;
+  }
+  const btn = document.getElementById('otpLoginBtn');
+  const spinner = document.getElementById('otpSpinner');
+  const btnText = document.getElementById('otpBtnText');
+  btn.disabled=true; spinner.classList.add('show'); btnText.textContent='Verifying...';
+  setTimeout(()=>{
+    if(otp==='123456'){ completeLogin(); }
+    else{
+      btn.disabled=false; spinner.classList.remove('show'); btnText.textContent='Verify & Login';
+      document.getElementById('otpErr').textContent='Incorrect OTP. Please try again.';
+      document.getElementById('otpErr').style.display='block';
+    }
+  }, 900);
+}
+function completeLogin(){
+  isLoggedIn = true;
+  document.getElementById('loginFormBody').style.display='none';
+  document.getElementById('loginSuccessScreen').classList.add('show');
+  setTimeout(()=>{
+    showScreen('screen-dashboard');
+    // reset login button states for next time
+    const btn=document.getElementById('loginBtn'); btn.disabled=false;
+    document.getElementById('loginSpinner').classList.remove('show');
+    document.getElementById('loginBtnText').textContent='Login';
+  }, 1100);
+}
+
+/* ================= STEPPER ================= */
+const STEPS = ["Select Crop","Payment","Book Slot","Confirm","Track"];
+function renderStepper(activeIndex, mountId){
+  let html = '<div class="stepper">';
+  STEPS.forEach((label,i)=>{
+    const cls = i<activeIndex? 'done' : (i===activeIndex? 'current':'');
+    html += `<div class="step-item ${cls}"><div class="step-dot">${i<activeIndex?'✓':i+1}</div><div class="step-label">${label}</div></div>`;
+    if(i<STEPS.length-1) html += `<div class="step-connector ${i<activeIndex?'done':''}"></div>`;
+  });
+  html += '</div>';
+  document.getElementById(mountId).innerHTML = html;
+}
+
+/* ================= CROP SELECTION ================= */
+const CROPS = [
+  {name:"Wheat", icon:"🌾"}, {name:"Rice", icon:"🍚"}, {name:"Maize", icon:"🌽"},
+  {name:"Soybean", icon:"🫘"}, {name:"Cotton", icon:"☁️"}, {name:"Sugarcane", icon:"🎋"},
+  {name:"Mustard", icon:"🌼"}, {name:"Tomato", icon:"🍅"}, {name:"Onion", icon:"🧅"}
+];
+function renderCropGrid(){
+  const grid = document.getElementById('cropGrid');
+  grid.innerHTML = CROPS.map(c=>`
+    <div class="crop-card ${selectedCrop===c.name?'selected':''}" onclick="pickCrop('${c.name}')">
+      <div class="crop-check">✓</div>
+      <div class="crop-emoji">${c.icon}</div>
+      <div class="crop-name">${c.name}</div>
+    </div>`).join('');
+}
+function pickCrop(name){
+  selectedCrop = name;
+  document.getElementById('cropErr').style.display='none';
+  renderCropGrid();
+}
+function startSellFlow(){
+  selectedCrop=null; selectedQty=null;
+  showScreen('screen-select-crop');
+  renderStepper(0,'stepper-1');
+  renderCropGrid();
+}
+function goToPayment(){
+  const qty = document.getElementById('qtyInput').value;
+  selectedUnit = document.getElementById('unitInput').value;
+  if(!selectedCrop || !qty || qty<=0){
+    document.getElementById('cropErr').style.display='block';
+    return;
+  }
+  selectedQty = qty;
+  showScreen('screen-payment');
+  renderStepper(1,'stepper-2');
+}
+
+/* ================= PAYMENT ================= */
+function selectPayMethod(el){
+  document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function processPayment(){
+  const btn=document.getElementById('payBtn'), sp=document.getElementById('paySpinner'), txt=document.getElementById('payBtnText');
+  btn.disabled=true; sp.classList.add('show'); txt.textContent='Processing...';
+  setTimeout(()=>{
+    btn.disabled=false; sp.classList.remove('show'); txt.textContent='Pay ₹500';
+    showScreen('screen-slot');
+    renderStepper(2,'stepper-3');
+    renderCalendar();
+    renderSlots();
+  }, 1100);
+}
+
+/* ================= SLOT BOOKING ================= */
+function renderCalendar(){
+  const dow = ['S','M','T','W','T','F','S'];
+  let html = dow.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  // Nov 1 2026 is a Sunday
+  for(let d=1; d<=30; d++){
+    const disabled = [3,9,15,22,27].includes(d);
+    const cls = d===selectedDate? 'selected' : (disabled? 'disabled':'');
+    html += `<div class="cal-day ${cls}" ${disabled?'':`onclick="pickDate(${d})"`}>${d}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+function pickDate(d){ selectedDate = d; renderCalendar(); }
+const SLOTS = ["09:00 AM","10:00 AM","11:00 AM","01:00 PM","02:00 PM","03:00 PM"];
+const DISABLED_SLOTS = ["11:00 AM","02:00 PM"];
+function renderSlots(){
+  document.getElementById('slotGrid').innerHTML = SLOTS.map(s=>{
+    const dis = DISABLED_SLOTS.includes(s);
+    const sel = selectedTime===s && !dis;
+    return `<button class="slot-btn ${sel?'selected':''}" ${dis?'disabled':''} onclick="pickTime('${s}')">${s}</button>`;
+  }).join('');
+}
+function pickTime(t){ selectedTime = t; document.getElementById('slotErr').style.display='none'; renderSlots(); }
+function confirmBooking(){
+  if(!selectedDate || !selectedTime){ document.getElementById('slotErr').style.display='block'; return; }
+  document.getElementById('confCrop').textContent = selectedCrop;
+  document.getElementById('confQty').textContent = `${selectedQty} ${selectedUnit}`;
+  document.getElementById('confDate').textContent = `${selectedDate} November 2026`;
+  document.getElementById('confTime').textContent = selectedTime;
+  document.getElementById('trkCrop').textContent = `${selectedCrop} · ${selectedQty} ${selectedUnit}`;
+  showScreen('screen-confirmation');
+}
+
+/* ================= INIT ================= */
+mountHeaders();
+renderCropGrid();
+</script>
+</body>
+</html>
