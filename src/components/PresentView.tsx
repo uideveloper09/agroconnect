@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   Maximize2,
   Minimize2,
   Presentation,
@@ -13,15 +15,15 @@ import {
 import { BrandMark } from "./BrandMark";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { Button } from "./ui";
-import { decks } from "@/lib/deck";
+import { PPT_FILE, PPT_SLIDES } from "@/lib/ppt";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 
 export function PresentView() {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
   const { user } = useAuth();
   const router = useRouter();
-  const slides = decks[lang];
+  const slides = PPT_SLIDES;
   const [index, setIndex] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const current = slides[index] ?? slides[0];
@@ -79,10 +81,6 @@ export function PresentView() {
     return () => window.removeEventListener("keydown", onKey);
   }, [go, homeHref, index, router, toggleFullscreen, total]);
 
-  useEffect(() => {
-    setIndex((i) => Math.min(i, slides.length - 1));
-  }, [slides.length]);
-
   return (
     <div className="flex min-h-dvh flex-col bg-[#081910] text-white">
       <header className="flex h-14 shrink-0 items-center justify-between gap-2 px-3 pt-[env(safe-area-inset-top)] sm:h-16 sm:px-5">
@@ -101,7 +99,7 @@ export function PresentView() {
       </header>
 
       <main className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-5 sm:pb-5">
-        <div className="relative mx-auto flex w-full max-w-[1100px] flex-1 items-center">
+        <div className="relative mx-auto flex w-full max-w-[1200px] flex-1 items-center">
           <button
             type="button"
             className="absolute top-1/2 left-0 z-10 hidden h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-black/30 text-white md:grid"
@@ -113,7 +111,7 @@ export function PresentView() {
           </button>
 
           <article
-            className="mx-auto flex aspect-video w-full max-h-[min(70dvh,720px)] flex-col overflow-hidden rounded-2xl bg-[#fffcf7] text-ink shadow-[0_30px_80px_-28px_rgba(0,0,0,0.65)] sm:rounded-3xl"
+            className="relative mx-auto aspect-video w-full max-h-[min(72dvh,760px)] overflow-hidden rounded-xl bg-white shadow-[0_30px_80px_-28px_rgba(0,0,0,0.65)] sm:rounded-2xl"
             onClick={(event) => {
               const rect = event.currentTarget.getBoundingClientRect();
               const x = event.clientX - rect.left;
@@ -121,54 +119,14 @@ export function PresentView() {
               else go(index + 1);
             }}
           >
-            <div className="flex h-10 items-center justify-between border-b border-line px-4 sm:h-12 sm:px-8">
-              <span className="inline-flex items-center gap-2 text-[11px] font-extrabold tracking-[0.16em] text-gold uppercase">
-                <Presentation size={14} /> {t("navPresent")}
-              </span>
-              <span className="text-[11px] font-bold text-sage">
-                {t("presentSlideOf", { n: index + 1, total })}
-              </span>
-            </div>
-
-            <div className="flex min-h-0 flex-1 flex-col justify-center px-5 py-5 sm:px-10 sm:py-8 md:px-14">
-              <p className="text-[11px] font-extrabold tracking-[0.2em] text-gold uppercase sm:text-[12px]">
-                {current.kicker}
-              </p>
-              <h1
-                className={`font-serif mt-2 leading-[1.12] text-forest ${
-                  current.kind === "title" || current.kind === "close"
-                    ? "text-[28px] sm:text-[44px] md:text-[56px]"
-                    : "text-[22px] sm:text-[32px] md:text-[40px]"
-                }`}
-              >
-                {current.title}
-              </h1>
-              {current.body && (
-                <p className="mt-4 max-w-[46ch] text-[15px] leading-7 text-sage sm:text-[18px] sm:leading-8">
-                  {current.body}
-                </p>
-              )}
-              {current.points && (
-                <ul className="mt-5 max-w-[58ch] space-y-2.5 sm:mt-6 sm:space-y-3">
-                  {current.points.map((point) => (
-                    <li key={point} className="flex gap-3 text-[14px] leading-6 text-ink sm:text-[17px] sm:leading-7">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-canopy" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {current.stats && (
-                <div className="mt-6 grid gap-3 sm:grid-cols-3 sm:gap-4">
-                  {current.stats.map((stat) => (
-                    <div key={stat.label} className="rounded-2xl border border-line bg-mist px-4 py-4">
-                      <p className="font-serif text-[28px] text-forest sm:text-[34px]">{stat.value}</p>
-                      <p className="mt-1 text-[12px] font-semibold text-sage sm:text-[13px]">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Image
+              src={current.src}
+              alt={current.title}
+              fill
+              priority
+              className="object-contain"
+              sizes="(min-width: 1200px) 1200px, 100vw"
+            />
           </article>
 
           <button
@@ -182,7 +140,15 @@ export function PresentView() {
           </button>
         </div>
 
-        <div className="mx-auto mt-3 flex w-full max-w-[1100px] flex-col gap-3">
+        <div className="mx-auto mt-3 flex w-full max-w-[1200px] flex-col gap-3">
+          <div className="flex items-center justify-between gap-3 text-[11px] font-bold tracking-[0.12em] text-gold-soft uppercase">
+            <span className="inline-flex items-center gap-2">
+              <Presentation size={14} /> agroconnect.pptx
+            </span>
+            <span className="text-white/70">
+              {t("presentSlideOf", { n: index + 1, total })}
+            </span>
+          </div>
           <div className="h-1 overflow-hidden rounded-full bg-white/10">
             <div
               className="h-full rounded-full bg-gold transition-[width] duration-300"
@@ -193,17 +159,15 @@ export function PresentView() {
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
             {slides.map((slide, i) => (
               <button
-                key={`${slide.title}-${i}`}
+                key={slide.src}
                 type="button"
                 onClick={() => go(i)}
-                className={`h-14 w-[92px] shrink-0 rounded-lg border px-2 py-1.5 text-left ${
-                  i === index ? "border-gold bg-white/15" : "border-white/10 bg-white/5 hover:bg-white/10"
+                className={`relative h-16 w-[104px] shrink-0 overflow-hidden rounded-lg border ${
+                  i === index ? "border-gold" : "border-white/10 hover:border-white/30"
                 }`}
+                aria-label={slide.title}
               >
-                <span className="block text-[9px] font-bold tracking-[0.12em] text-gold-soft uppercase">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="mt-0.5 line-clamp-2 text-[10px] leading-tight text-white/80">{slide.title}</span>
+                <Image src={slide.src} alt="" fill className="object-cover" sizes="104px" />
               </button>
             ))}
           </div>
@@ -217,6 +181,13 @@ export function PresentView() {
               <Button $variant="ghost" type="button" onClick={() => go(index + 1)} disabled={index === total - 1}>
                 {t("presentNext")} <ChevronRight size={16} />
               </Button>
+              <a
+                href={PPT_FILE}
+                download="agroconnect.pptx"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[14px] border border-white/28 bg-white/10 px-4 py-2 text-[14px] font-bold text-white hover:bg-white/20 sm:px-[22px] sm:text-[15px]"
+              >
+                <Download size={16} /> {t("presentDownload")}
+              </a>
               <Button $variant="gold" type="button" onClick={() => void toggleFullscreen()}>
                 {fullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
                 {fullscreen ? t("presentExitFs") : t("presentFullscreen")}

@@ -223,6 +223,7 @@ export const en = {
   presentExitFs: "Exit full screen",
   presentSlideOf: "Slide {n} of {total}",
   presentHint: "← → Space · F present · Esc exit",
+  presentDownload: "Download PPT",
 };
 
 export const hn: { [K in keyof typeof en]: string } = {
@@ -450,6 +451,7 @@ export const hn: { [K in keyof typeof en]: string } = {
   presentExitFs: "फुल स्क्रीन बंद",
   presentSlideOf: "स्लाइड {n} / {total}",
   presentHint: "← → Space · F प्रस्तुत · Esc बाहर",
+  presentDownload: "PPT डाउनलोड करें",
 };
 
 export type MsgKey = keyof typeof en;
